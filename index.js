@@ -3,9 +3,11 @@ const express = require('express');
 const http = require('http');
 const bodyParser = require('body-parser');
 const logger = require('winston');
+const expressGraphQL = require('express-graphql');
 
 const apiRoutes = require('./api/_index');
 const errorMiddleware = require('./middleware/error');
+const graphqlSchema = require('./graphql/_index');
 
 logger.cli();
 logger.level = 'debug';
@@ -16,7 +18,17 @@ const httpServer = http.createServer(app);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// GraphQL Endpoints
+app.use('/graphql', expressGraphQL({
+  schema: graphqlSchema,
+  pretty: true,
+  graphiql: true
+}));
+
+// Error handling middleware
 app.use(errorMiddleware);
+
+// REST API Endpoints
 app.use('/api/v1', apiRoutes);
 
 console.log('Starting server...');
